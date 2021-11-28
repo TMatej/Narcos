@@ -21,43 +21,4 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
-
-#Maven
-narcos/target/
-narcos/pom.xml.tag
-narcos/pom.xml.releaseBackup
-narcos/pom.xml.versionsBackup
-narcos/release.properties
-
-# Eclipse
-narcos/.project
-narcos/.classpath
-narcos/.settings/
-narcos/bin/
-
-# IntelliJ
-narcos/*.idea
-*.ipr
-*.iml
-*.iws
-
-# NetBeans
-narcos/nb-configuration.xml
-
-# Visual Studio Code
-narcos/.vscode
-narcos/.factorypath
-
-# OSX
-.DS_Store
-
-# Vim
-*.swp
-*.swo
-
-# patch
-*.orig
-*.rej
-
-# Local environment
-.env
+.idea
