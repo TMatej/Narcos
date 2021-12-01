@@ -1,10 +1,12 @@
 package cz.fi.muni.pv217.narcos.user.resource;
 
 import cz.fi.muni.pv217.narcos.user.DTOs.UserDTO;
+import cz.fi.muni.pv217.narcos.user.DTOs.UserUpdateDTO;
 import cz.fi.muni.pv217.narcos.user.entity.Person;
 import cz.fi.muni.pv217.narcos.user.repository.PersonRepository;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.Arrays;
@@ -32,6 +34,7 @@ public class UserResource {
     @Produces(MediaType.APPLICATION_JSON)
     public UserDTO getUserById(@PathParam("id") Long id) {
         Person person = personRepository.findById(id);
+
         if (person == null) {
             throw new WebApplicationException(403);
         }
@@ -67,6 +70,48 @@ public class UserResource {
                 .map(this::personToUserDTO)
                 .collect(Collectors.toList());
     }
+
+    // TODO update, delete endpoints -> create two roles (admin, basic user).
+
+    @PUT
+    @Path("{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
+    @Transactional
+    public String updateUserById(@PathParam("id") Long id, UserUpdateDTO userUpdateDTO) {
+        Person person = personRepository.findById(id);
+
+        if (person == null) {
+            throw new WebApplicationException(403);
+        }
+
+        // map all fields from the user parameter to the existing entity
+        person.email = userUpdateDTO.email;
+        person.password = userUpdateDTO.password;
+        person.firstName = userUpdateDTO.firstname;
+        person.lastName = userUpdateDTO.lastName;
+
+        return String.format("User with id %d updated!", person.id);
+    }
+
+    @DELETE
+    @Path("{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
+    @Transactional
+    public String deleteUserById(@PathParam("id") Long id) {
+        Person person = personRepository.findById(id);
+
+        if (person == null) {
+            throw new WebApplicationException(403);
+        }
+        personRepository.delete(person);
+
+        return String.format("User with id %d deleted!", id);
+    }
+
+    // TODO Only admin may list/update/delete any user.
+    // TODO Basic user may list/update/delete only themself.
 
     /**
      * Function for mapping Person to UserDTO.
