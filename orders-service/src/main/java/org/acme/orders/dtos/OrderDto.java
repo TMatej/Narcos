@@ -1,0 +1,55 @@
+package org.acme.orders.dtos;
+
+import org.acme.orders.entities.OrderStatus;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+public class OrderDto {
+    private Long id;
+    private Long userId;
+    private LocalDateTime createdAt;
+    private OrderStatus status;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public OrderStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(OrderStatus status) {
+        this.status = status;
+    }
+
+    public List<OrderItemDto> getItems() {
+        return items;
+    }
+
+    public void setItems(List<OrderItemDto> items) {
+        this.items = items;
+    }
+
+    private List<OrderItemDto> items;
+}
