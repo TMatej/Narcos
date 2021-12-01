@@ -48,8 +48,9 @@ public class AuthResource {
     @POST
     @Path("register")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
     @Transactional
-    public void register(RegisterInformationDTO registerInformationDTO) {
+    public String register(RegisterInformationDTO registerInformationDTO) {
         Person person = personRepository.findByEmail(registerInformationDTO.email);
 
         if (person != null) {
@@ -68,5 +69,7 @@ public class AuthResource {
             LOG.error("Failed to persist person", ex);
             throw new WebApplicationException(400);
         }
+
+        return String.format("User with username '%s' created!", person.email);
     }
 }
