@@ -5,7 +5,6 @@ import cz.fi.muni.pv217.narcos.user.DTOs.RegisterInformationDTO;
 import cz.fi.muni.pv217.narcos.user.entity.Person;
 
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 import javax.validation.ConstraintViolationException;
 import javax.ws.rs.*;
