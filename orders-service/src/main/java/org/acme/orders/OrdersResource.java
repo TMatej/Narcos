@@ -7,6 +7,9 @@ import org.acme.orders.dtos.OrderItemDto;
 import org.acme.orders.entities.Order;
 import org.acme.orders.entities.OrderItem;
 import org.acme.orders.entities.OrderStatus;
+import org.eclipse.microprofile.metrics.MetricUnits;
+import org.eclipse.microprofile.metrics.annotation.Counted;
+import org.eclipse.microprofile.metrics.annotation.Timed;
 
 import javax.transaction.Transactional;
 import javax.ws.rs.Consumes;
@@ -51,6 +54,8 @@ public class OrdersResource {
     @POST
     @Transactional
     @Path("new")
+    @Counted(name = "createdOrders", description = "How many orders were created.")
+    @Timed(name = "createdTimer", description = "How long it takes to create orders.", unit = MetricUnits.MILLISECONDS)
     public Response createOrder(CreateOrderDto order) {
         // check whether user of the order exists
         // check whether all the medications exist
