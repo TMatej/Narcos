@@ -3,8 +3,11 @@ package cz.fi.muni.pv217.narcos.user.entity;
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 
 import javax.persistence.Entity;
+import javax.persistence.Table;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import java.util.Set;
+import java.util.stream.Stream;
 
 
 /**
@@ -16,6 +19,7 @@ import javax.validation.constraints.NotBlank;
  * @author Matej Turek
  */
 @Entity
+@Table(name = "persons")
 public class Person extends PanacheEntity {
     @NotBlank
     public String firstName;

@@ -7,6 +7,11 @@ import cz.fi.muni.pv217.narcos.user.repository.PersonRepository;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Matej Turek
@@ -16,6 +21,12 @@ public class UserResource {
     @Inject
     PersonRepository personRepository;
 
+    /**
+     * Endpoint for requesting specific user by their id.
+     *
+     * @param id path parameter representing the id of specific user
+     * @return requested user by id.
+     */
     @GET
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -26,6 +37,35 @@ public class UserResource {
         }
 
         return personToUserDTO(person);
+    }
+
+    /**
+     * Endpoint for requesting list of specific users by providing their ids.
+     *
+     * @param ids - query parameter containing users ids divided by comma.
+     * @return list of requested users.
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<UserDTO> getUsersById(@QueryParam("ids") String ids) {
+        Stream<Person> stream;
+        if (ids != null) {
+            try {
+                Set<Long> idsSet = Arrays
+                        .stream(ids.split(","))
+                        .map(Long::decode)
+                        .collect(Collectors.toSet());
+                stream = personRepository.streamByIds(idsSet);
+            } catch (NumberFormatException e) {
+                throw new WebApplicationException(404);
+            }
+        } else {
+            stream = Person.streamAll();
+        }
+
+        return stream
+                .map(this::personToUserDTO)
+                .collect(Collectors.toList());
     }
 
     /**

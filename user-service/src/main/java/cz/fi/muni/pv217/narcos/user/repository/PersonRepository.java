@@ -4,6 +4,8 @@ import cz.fi.muni.pv217.narcos.user.entity.Person;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 
 import javax.enterprise.context.ApplicationScoped;
+import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * Class allowing management of class (entities) Person.
@@ -19,5 +21,9 @@ public class PersonRepository implements PanacheRepository<Person> {
 
     public Person findByEmail(String email) {
         return find("email", email).firstResult();
+    }
+
+    public Stream<Person> streamByIds(Set<Long> ids) {
+        return streamAll().filter(person -> ids.contains(person.id));
     }
 }
