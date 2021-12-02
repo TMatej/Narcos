@@ -1,5 +1,7 @@
 package cz.fi.muni.pv217.narcos.user.DTOs;
 
+import cz.fi.muni.pv217.narcos.user.entity.Role;
+
 /**
  * DTO representation of Person.
  *
@@ -10,4 +12,5 @@ public class UserDTO {
     public String firstname;
     public String lastName;
     public String email;
+    public Role role;
 }

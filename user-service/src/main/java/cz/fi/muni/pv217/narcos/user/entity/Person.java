@@ -6,8 +6,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
-import java.util.Set;
-import java.util.stream.Stream;
+import javax.validation.constraints.NotNull;
 
 
 /**
@@ -29,6 +28,8 @@ public class Person extends PanacheEntity {
     public String email;
     @NotBlank
     public String password;
+    @NotNull
+    public Role role;
     // variable that holds information, whether the object was deleted
     public boolean stored;
 }

@@ -4,7 +4,10 @@ import cz.fi.muni.pv217.narcos.user.DTOs.UserDTO;
 import cz.fi.muni.pv217.narcos.user.DTOs.UserUpdateDTO;
 import cz.fi.muni.pv217.narcos.user.entity.Person;
 import cz.fi.muni.pv217.narcos.user.repository.PersonRepository;
+import org.eclipse.microprofile.jwt.JsonWebToken;
+import org.jboss.logging.Logger;
 
+import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.ws.rs.*;
@@ -20,8 +23,13 @@ import java.util.stream.Stream;
  */
 @Path("/users")
 public class UserResource {
+
+    private static final Logger LOG = Logger.getLogger(UserResource.class);
+
     @Inject
     PersonRepository personRepository;
+    @Inject
+    JsonWebToken jwt;
 
     /**
      * Endpoint for requesting specific user by their id.
@@ -31,11 +39,15 @@ public class UserResource {
      */
     @GET
     @Path("{id}")
+    @RolesAllowed({"Admin", "User"})
     @Produces(MediaType.APPLICATION_JSON)
     public UserDTO getUserById(@PathParam("id") Long id) {
+        LOG.info(String.format("Starting procedure get user with id %d.", id));
+        check(id);
         Person person = personRepository.findById(id);
 
         if (person == null) {
+            LOG.error(String.format("User with id %d doesn't exists.", id));
             throw new WebApplicationException(403);
         }
 
@@ -49,8 +61,10 @@ public class UserResource {
      * @return list of requested users.
      */
     @GET
+    @RolesAllowed({"Admin"})
     @Produces(MediaType.APPLICATION_JSON)
-    public List<UserDTO> getUsersById(@QueryParam("ids") String ids) {
+    public List<UserDTO> getUsers(@QueryParam("id") String ids) {
+        LOG.info(String.format("Starting procedure get multiple users with ids %s.", ids));
         Stream<Person> stream;
         if (ids != null) {
             try {
@@ -71,14 +85,15 @@ public class UserResource {
                 .collect(Collectors.toList());
     }
 
-    // TODO update, delete endpoints -> create two roles (admin, basic user).
-
     @PUT
     @Path("{id}")
+    @RolesAllowed({"Admin", "User"})
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     @Transactional
     public String updateUserById(@PathParam("id") Long id, UserUpdateDTO userUpdateDTO) {
+        LOG.info(String.format("Starting procedure update user with id %d.", id));
+        check(id);
         Person person = personRepository.findById(id);
 
         if (person == null) {
@@ -91,15 +106,20 @@ public class UserResource {
         person.firstName = userUpdateDTO.firstname;
         person.lastName = userUpdateDTO.lastName;
 
+        LOG.info(String.format("User with id %d updated!", person.id));
+
         return String.format("User with id %d updated!", person.id);
     }
 
     @DELETE
     @Path("{id}")
+    @RolesAllowed({"Admin", "User"})
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     @Transactional
     public String deleteUserById(@PathParam("id") Long id) {
+        LOG.info(String.format("Starting procedure delete user with id %d.", id));
+        check(id);
         Person person = personRepository.findById(id);
 
         if (person == null) {
@@ -109,9 +129,6 @@ public class UserResource {
 
         return String.format("User with id %d deleted!", id);
     }
-
-    // TODO Only admin may list/update/delete any user.
-    // TODO Basic user may list/update/delete only themself.
 
     /**
      * Function for mapping Person to UserDTO.
@@ -126,5 +143,15 @@ public class UserResource {
         user.lastName = person.lastName;
         user.email = person.email;
         return user;
+    }
+
+    private void check(Long id) {
+        LOG.info("Verifying user access rights.");
+
+        if (!Long.decode(jwt.getSubject()).equals(id) &&
+                !jwt.getGroups().contains("Admin")) {
+            LOG.error("Verification failed.");
+            throw new WebApplicationException(403);
+        }
     }
 }
