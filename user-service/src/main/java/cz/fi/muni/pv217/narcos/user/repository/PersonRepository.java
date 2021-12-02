@@ -8,8 +8,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 /**
- * Class allowing management of class (entities) Person.
- * Repository pattern
+ * Repository of class (entities) Person.
  *
  * @author Matej Turek
  */
