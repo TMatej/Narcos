@@ -33,5 +33,6 @@
     </dependencies>
     <modules>
         <module>user-service</module>
+        <module>orders-service</module>
     </modules>
 </project>
