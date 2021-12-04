@@ -12,6 +12,7 @@ import javax.ws.rs.core.MediaType;
 
 import cz.fi.muni.pv217.narcos.user.repository.PersonRepository;
 import io.smallrye.jwt.build.Jwt;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 
 import java.util.Collections;
@@ -26,6 +27,9 @@ import java.util.HashSet;
 public class AuthResource {
     @Inject
     PersonRepository personRepository;
+
+    @ConfigProperty(name = "mp.jwt.verify.issuer")
+    String issuer;
 
     private static final Logger LOG = Logger.getLogger(AuthResource.class);
 
@@ -50,7 +54,8 @@ public class AuthResource {
 
         HashSet<String> roles = new HashSet<>(Collections.singletonList(person.role.toString()));
         String token = Jwt
-                .issuer("http://127.0.0.1:8888/issuer")
+                .issuer(issuer)
+                .upn(loginInformationDTO.email)
                 .groups(roles)
                 .subject(person.id.toString())
                 .sign();
