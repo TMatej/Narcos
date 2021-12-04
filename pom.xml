@@ -34,5 +34,6 @@
     <modules>
         <module>user-service</module>
         <module>orders-service</module>
+        <module>pharmacy-service</module>
     </modules>
 </project>
