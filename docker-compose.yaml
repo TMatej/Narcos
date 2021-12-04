@@ -1,0 +1,34 @@
+version: "3"
+services:
+  user:
+    container_name: pv217_user
+    build:
+      dockerfile: src/main/docker/Dockerfile.jvm
+      context: user-service
+    ports:
+    - "8081:8081"
+    environment:
+      quarkus.datasource.jdbc.url: jdbc:postgresql://postgres:5432/d
+    depends_on:
+      - postgres
+
+  pharmacy:
+    container_name: pv217_pharmacy
+    build:
+      dockerfile: src/main/docker/Dockerfile.jvm
+      context: pharmacy-service
+    ports:
+      - "8082:8082"
+    environment:
+      quarkus.datasource.jdbc.url: jdbc:postgresql://postgres:5432/d
+    depends_on:
+      - postgres
+  postgres:
+    container_name: postgres
+    image: registry.fedoraproject.org/f33/postgresql
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRESQL_USER: u
+      POSTGRESQL_PASSWORD: p
+      POSTGRESQL_DATABASE: d

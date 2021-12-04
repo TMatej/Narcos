@@ -28,11 +28,32 @@ public class PharmacyResource {
     JsonWebToken jwt;
 
     @GET
+    @RolesAllowed({"Admin", "User"})
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<Pharmacy> getAllPharmacies() {
+        LOG.info("Getting all pharmacies.");
+
+        return repository.listAll();
+    }
+
+    @POST
+    @RolesAllowed({"Admin"})
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Pharmacy createPharmacy(Pharmacy pharmacy) {
+        LOG.info("Creating new pharmacy.");
+
+        repository.persist(pharmacy);
+
+        return pharmacy;
+    }
+
+    @GET
     @Path("{id}")
     @RolesAllowed({"Admin", "User"})
     @Produces(MediaType.APPLICATION_JSON)
     public Pharmacy getPharmacyById(@PathParam("id") Long id) {
-        LOG.infof("Getting user with id %d", id);
+        LOG.infof("Getting pharmacy with id %d", id);
 
         Pharmacy pharmacy = repository.findById(id);
 
@@ -45,10 +66,10 @@ public class PharmacyResource {
     }
 
     @GET
-    @RolesAllowed({"Admin"})
+    @RolesAllowed({"Admin", "User"})
     @Produces(MediaType.APPLICATION_JSON)
     public List<Pharmacy> getPharmacies(@QueryParam("id") String ids) {
-        LOG.infof("Getting multiple users with ids %d.", ids);
+        LOG.infof("Getting multiple pharmacies with ids %d.", ids);
         Stream<Pharmacy> stream;
         if (ids != null) {
             try {
@@ -100,7 +121,7 @@ public class PharmacyResource {
     @Produces(MediaType.TEXT_PLAIN)
     @Transactional
     public String deletePharmacyById(@PathParam("id") Long id) {
-        LOG.infof("Deleting use with id %d.", id);
+        LOG.infof("Deleting pharmacy with id %d.", id);
         Pharmacy pharmacy = repository.findById(id);
 
         if (pharmacy == null) {
