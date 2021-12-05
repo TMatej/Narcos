@@ -23,6 +23,19 @@ services:
       quarkus.datasource.jdbc.url: jdbc:postgresql://postgres:5432/d
     depends_on:
       - postgres
+
+  orders:
+    container_name: pv217_orders
+    build:
+      dockerfile: src/main/docker/Dockerfile.jvm
+      context: orders-service
+    ports:
+      - "8084:8084"
+    environment:
+      quarkus.datasource.jdbc.url: jdbc:postgresql://postgres:5432/d
+    depends_on:
+      - postgres
+
   postgres:
     container_name: postgres
     image: registry.fedoraproject.org/f33/postgresql
