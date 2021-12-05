@@ -25,30 +25,6 @@ public class MedicineResource {
     @Inject
     JsonWebToken jwt;
 
-    @GET
-    @Path("hello-admin")
-    @Produces(MediaType.TEXT_PLAIN)
-    @RolesAllowed({"Admin"})
-    public String hello_admin() {
-        return "Hello admin";
-    }
-
-    @GET
-    @Path("hello-user")
-    @Produces(MediaType.TEXT_PLAIN)
-    @RolesAllowed({"User"})
-    public String hello_user() {
-        return "Hello user";
-    }
-
-    @GET
-    @Path("hello")
-    @Produces(MediaType.TEXT_PLAIN)
-    @PermitAll
-    public String hello() {
-        return "Hello all";
-    }
-
     /**
      * Endpoint for requesting specific medicine by its id.
      *
