@@ -24,6 +24,18 @@ services:
     depends_on:
       - postgres
 
+  medicine:
+    container_name: pv217_medicine
+    build:
+      dockerfile: src/main/docker/Dockerfile.jvm
+      context: user-service
+    ports:
+      - "8083:8083"
+    environment:
+      quarkus.datasource.jdbc.url: jdbc:postgresql://postgres:5432/d
+    depends_on:
+      - postgres
+
   orders:
     container_name: pv217_orders
     build:
@@ -34,7 +46,8 @@ services:
     environment:
       quarkus.datasource.jdbc.url: jdbc:postgresql://postgres:5432/d
     depends_on:
-      - postgres
+        - postgres
+
 
   postgres:
     container_name: postgres
