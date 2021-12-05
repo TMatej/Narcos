@@ -12,8 +12,8 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -41,17 +41,17 @@ public class UserResource {
     @Path("{id}")
     @RolesAllowed({"Admin", "User"})
     @Produces(MediaType.APPLICATION_JSON)
-    public UserDTO getUserById(@PathParam("id") Long id) {
+    public Response getUserById(@PathParam("id") Long id) {
         LOG.info(String.format("Starting procedure get user with id %d.", id));
         check(id);
         Person person = personRepository.findById(id);
 
         if (person == null) {
             LOG.error(String.format("User with id %d doesn't exists.", id));
-            throw new WebApplicationException(403);
+            return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
-        return personToUserDTO(person);
+        return Response.ok(personToUserDTO(person)).build();
     }
 
     /**
@@ -63,7 +63,7 @@ public class UserResource {
     @GET
     @RolesAllowed({"Admin"})
     @Produces(MediaType.APPLICATION_JSON)
-    public List<UserDTO> getUsers(@QueryParam("id") String ids) {
+    public Response getUsers(@QueryParam("id") String ids) {
         LOG.info(String.format("Starting procedure get multiple users with ids %s.", ids));
         Stream<Person> stream;
         if (ids != null) {
@@ -74,15 +74,15 @@ public class UserResource {
                         .collect(Collectors.toSet());
                 stream = personRepository.streamByIds(idsSet);
             } catch (NumberFormatException e) {
-                throw new WebApplicationException(404);
+                return Response.status(Response.Status.NOT_FOUND).build();
             }
         } else {
             stream = Person.streamAll();
         }
 
-        return stream
+        return Response.ok(stream
                 .map(this::personToUserDTO)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList())).build();
     }
 
     @PUT
@@ -91,13 +91,13 @@ public class UserResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     @Transactional
-    public String updateUserById(@PathParam("id") Long id, UserUpdateDTO userUpdateDTO) {
+    public Response updateUserById(@PathParam("id") Long id, UserUpdateDTO userUpdateDTO) {
         LOG.info(String.format("Starting procedure update user with id %d.", id));
         check(id);
         Person person = personRepository.findById(id);
 
         if (person == null) {
-            throw new WebApplicationException(403);
+            return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
         // map all fields from the user parameter to the existing entity
@@ -108,7 +108,7 @@ public class UserResource {
 
         LOG.info(String.format("User with id %d updated!", person.id));
 
-        return String.format("User with id %d updated!", person.id);
+        return Response.ok(String.format("User with id %d updated!", person.id)).build();
     }
 
     @DELETE
@@ -117,17 +117,17 @@ public class UserResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     @Transactional
-    public String deleteUserById(@PathParam("id") Long id) {
+    public Response deleteUserById(@PathParam("id") Long id) {
         LOG.info(String.format("Starting procedure delete user with id %d.", id));
         check(id);
         Person person = personRepository.findById(id);
 
         if (person == null) {
-            throw new WebApplicationException(403);
+            return Response.status(Response.Status.BAD_REQUEST).build();
         }
         personRepository.delete(person);
 
-        return String.format("User with id %d deleted!", id);
+        return Response.ok(String.format("User with id %d deleted!", id)).build();
     }
 
     /**
