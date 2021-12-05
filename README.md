@@ -24,9 +24,10 @@ _*Have a scenario that you can run that showcase some reactive properties of the
 ## Microservices
 Here you can find list of available services.
   * `user-service`: http://localhost:8081/
-  * `medicine-service`: http://localhost:8082/
-  * `order-service`: http://localhost:8080/
-  * `pharmacy-service`: http://localhost:8080/
+  * `pharmacy-service`: http://localhost:8082/
+  * `medicine-service`: http://localhost:8083/
+  * `order-service`: http://localhost:8084/
+  * `record-service` : http://localhost:8085/
   * `auth-service`: http://localhost:8888/
  
 ### User Service doc
