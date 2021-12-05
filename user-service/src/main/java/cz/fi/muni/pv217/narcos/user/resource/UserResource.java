@@ -142,6 +142,7 @@ public class UserResource {
         user.firstname = person.firstName;
         user.lastName = person.lastName;
         user.email = person.email;
+        user.role = person.role;
         return user;
     }
 
