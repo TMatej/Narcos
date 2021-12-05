@@ -11,7 +11,7 @@ import java.time.LocalDate;
 /**
  * @author Matej Turek
  */
-@Entity()
+@Entity
 @Table(name = "medicine")
 public class Medicine extends PanacheEntity {
     @NotBlank
