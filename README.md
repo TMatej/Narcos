@@ -30,14 +30,22 @@ Here you can find list of available services.
   * `record-service` : http://localhost:8085/
   * `auth-service`: http://localhost:8888/
  
-### User Service doc
+### User Service
+This service manages individual users and stores them in a relational daabse. It also allows authentication of the users (admin/user) for using secured endpoints.
+User Service contains following endpoints:
+  * `GET /auth/login` - Endpoint ensures authentication of individual users and allowing access to all secured endpoints of all services accordingly. For doing so it uses so called token authentication (bearer authentication). As a input it consumes JSON object conzisting of `email` and `password` properties. After successful authentication of received credentials it outputs a time-limited `JWT token` that holds ID of the authenticated person and the role (Admin/User), which the person represents in the system.
+  * `POST /auth/register` - Endpoint for registration of users. As a input it consumes JSON object conzisting of `email`, `password`, `firstName`, `lastName` and desired `role`. After successful verification that the supplied email has not been used yet, the record is inserted into db table `person` and acknowledge message is returned.
+  * `GET /users/{id}` - Lists requested user by id. Can be called by any authenticated user, but only `Admin` has rights to receive information about any other user. Basic `User` can only show their personal information.
+  * `GET /users?id={}` - Similarly to previous endpoint it serves to list information about user, but instead of using path parameter it utilizes query parameter `id` which  holds comma separated list of ids. This endpoit is accessible only to the `Admin`.
+  * `PUT /users/{id}` - Endpoint for updating of user specified by `id`. As a input it consumes JSON object conzisting of `email`, `password`, `firstName`, `lastName` and `role`. 
+  * `DELETE /users/{id}` - Endpoint for deleting of user specified by `id`. 
 ### Medicine Service doc
 ### Order Service doc
 ### Pharmacy Service doc
 ### Auth Service doc
 Endpoints:  
-  * `GET /auth/login`
-  * `POST /auth/register `
+  * 
+  * 
 
 ### Swagger/OpenAPI
 
