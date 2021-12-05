@@ -18,7 +18,7 @@ import javax.validation.constraints.NotNull;
  * @author Matej Turek
  */
 @Entity
-@Table(name = "persons")
+@Table(name = "person")
 public class Person extends PanacheEntity {
     @NotBlank
     public String firstName;
