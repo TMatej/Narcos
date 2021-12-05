@@ -29,11 +29,9 @@ public class DatabaseConnectionHealthCheck implements HealthCheck {
     @ConfigProperty(name = "quarkus.datasource.password")
     String databasePassword;
 
-    private final String hcName = "User service readiness check";
-
     @Override
     public HealthCheckResponse call() {
-        HealthCheckResponseBuilder responseBuilder = HealthCheckResponse.named(hcName);
+        HealthCheckResponseBuilder responseBuilder = HealthCheckResponse.named("User service readiness check");
 
         try (Connection connection = DriverManager.getConnection(databaseUrl, databaseUsername, databasePassword)) {
             responseBuilder.up();

@@ -24,16 +24,11 @@
             </plugins>
         </build>
     <dependencies>
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-hibernate-orm-panache</artifactId>
-            <version>1.10.3.Final</version>
-            <scope>compile</scope>
-        </dependency>
     </dependencies>
     <modules>
         <module>user-service</module>
         <module>orders-service</module>
         <module>pharmacy-service</module>
+        <module>medicine-service</module>
     </modules>
 </project>
