@@ -57,6 +57,13 @@
       <scope>test</scope>
     </dependency>
 
+    <!-- Testing of secured endpoints -->
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-test-security-jwt</artifactId>
+      <scope>test</scope>
+    </dependency>
+
     <!-- Easier API for testing -->
     <dependency>
       <groupId>io.rest-assured</groupId>
