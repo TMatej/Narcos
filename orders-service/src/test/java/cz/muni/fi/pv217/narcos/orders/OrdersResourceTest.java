@@ -1,4 +1,4 @@
-package org.acme.orders;
+package cz.muni.fi.pv217.narcos.orders;
 
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;

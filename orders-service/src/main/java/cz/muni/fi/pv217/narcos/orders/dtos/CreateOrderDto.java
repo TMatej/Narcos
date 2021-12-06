@@ -1,4 +1,4 @@
-package org.acme.orders.dtos;
+package cz.muni.fi.pv217.narcos.orders.dtos;
 
 import java.util.List;
 

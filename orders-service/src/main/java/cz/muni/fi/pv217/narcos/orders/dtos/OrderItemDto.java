@@ -1,8 +1,17 @@
-package org.acme.orders.dtos;
+package cz.muni.fi.pv217.narcos.orders.dtos;
 
-public class CreateOrderItemDto {
+public class OrderItemDto {
+    private Long id;
     private Long medicationId;
     private Integer count;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public Long getMedicationId() {
         return medicationId;

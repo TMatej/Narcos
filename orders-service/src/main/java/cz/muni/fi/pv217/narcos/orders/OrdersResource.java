@@ -1,12 +1,9 @@
-package org.acme.orders;
+package cz.muni.fi.pv217.narcos.orders;
 
-import org.acme.orders.dtos.CreateOrderDto;
-import org.acme.orders.dtos.CreateOrderItemDto;
-import org.acme.orders.dtos.OrderDto;
-import org.acme.orders.dtos.OrderItemDto;
-import org.acme.orders.entities.Order;
-import org.acme.orders.entities.OrderItem;
-import org.acme.orders.entities.OrderStatus;
+import cz.muni.fi.pv217.narcos.orders.dtos.CreateOrderItemDto;
+import cz.muni.fi.pv217.narcos.orders.dtos.OrderDto;
+import cz.muni.fi.pv217.narcos.orders.dtos.OrderItemDto;
+import cz.muni.fi.pv217.narcos.orders.entities.Order;
 import org.eclipse.microprofile.metrics.MetricUnits;
 import org.eclipse.microprofile.metrics.annotation.Counted;
 import org.eclipse.microprofile.metrics.annotation.Timed;
@@ -22,6 +19,11 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import cz.muni.fi.pv217.narcos.orders.dtos.CreateOrderDto;
+import cz.muni.fi.pv217.narcos.orders.entities.OrderItem;
+import cz.muni.fi.pv217.narcos.orders.entities.OrderStatus;
+import org.jboss.logging.Logger;
+
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,8 +34,17 @@ import java.util.stream.Collectors;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class OrdersResource {
+    private static final Logger LOG = Logger.getLogger(OrdersResource.class);
+
+//    @ConfigProperty(name = "pv217.userService")
+//    String userServiceUrl;
+//
+//    @Inject
+//    JsonWebToken jwt;
+
     @GET
     public List<OrderDto> getAllOrders(@QueryParam("userId") Long userId) {
+        LOG.info("Getting all orders" + (userId != null ? String.format(" from user %d", userId) : ""));
         List<Order> orders;
         if (userId != null) {
             orders = Order.list("userId", userId);
@@ -58,14 +69,17 @@ public class OrdersResource {
     @Counted(name = "createdOrders", description = "How many orders were created.")
     @Timed(name = "createdTimer", description = "How long it takes to create orders.", unit = MetricUnits.MILLISECONDS)
     public Response createOrder(CreateOrderDto order) {
+        LOG.info(String.format("Creating order from user %d to pharmacy %d", order.getUserId(), order.getPharmacyId()));
         // check whether user of the order exists
+        if (!checkUserExists(order.getUserId())) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("User does not exist").build();
+        }
         // check whether the pharmacy exists
         // check whether all the medications exist
         // check whether there is enough medications in store
         Order orderEntity = createOrderToEntity(order);
         orderEntity.persist();
         if (orderEntity.isPersistent()) {
-            // send email about the created order
             return Response.created(URI.create("/orders/" + orderEntity.id)).build();
         }
         return Response.status(Response.Status.BAD_REQUEST).build();
@@ -81,6 +95,17 @@ public class OrdersResource {
         //check whether the change is valid
         order.status = status;
         return Response.ok().build();
+    }
+
+    private boolean checkUserExists(Long userId) {
+        return true;
+//        UserDto user = ClientBuilder.newClient()
+//                .target(userServiceUrl + "/" + userId)
+//                .request()
+//                .header("Authorization", "Bearer " + jwt.getRawToken())
+//                .get()
+//                .readEntity(new GenericType<>(){});
+//        return user != null;
     }
 
     private Order createOrderToEntity(CreateOrderDto order) {

@@ -1,6 +1,6 @@
-package org.acme.orders.dtos;
+package cz.muni.fi.pv217.narcos.orders.dtos;
 
-import org.acme.orders.entities.OrderStatus;
+import cz.muni.fi.pv217.narcos.orders.entities.OrderStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;

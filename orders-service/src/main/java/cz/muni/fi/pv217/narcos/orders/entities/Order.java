@@ -1,4 +1,4 @@
-package org.acme.orders.entities;
+package cz.muni.fi.pv217.narcos.orders.entities;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import org.hibernate.annotations.CreationTimestamp;
