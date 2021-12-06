@@ -10,11 +10,11 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.List;
 
 @Path("/pharmacies")
 public class PharmacyResource {
@@ -30,45 +30,46 @@ public class PharmacyResource {
     @GET
     @RolesAllowed({"Admin", "User"})
     @Produces(MediaType.APPLICATION_JSON)
-    public List<Pharmacy> getAllPharmacies() {
+    public Response getAllPharmacies() {
         LOG.info("Getting all pharmacies.");
 
-        return repository.listAll();
+        return Response.ok(repository.listAll()).build();
     }
 
     @POST
     @RolesAllowed({"Admin"})
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Pharmacy createPharmacy(Pharmacy pharmacy) {
+    @Transactional
+    public Response createPharmacy(Pharmacy pharmacy) {
         LOG.info("Creating new pharmacy.");
 
         repository.persist(pharmacy);
 
-        return pharmacy;
+        return Response.ok(pharmacy).build();
     }
 
     @GET
     @Path("{id}")
     @RolesAllowed({"Admin", "User"})
     @Produces(MediaType.APPLICATION_JSON)
-    public Pharmacy getPharmacyById(@PathParam("id") Long id) {
+    public Response getPharmacyById(@PathParam("id") Long id) {
         LOG.infof("Getting pharmacy with id %d", id);
 
         Pharmacy pharmacy = repository.findById(id);
 
         if (pharmacy == null) {
             LOG.errorf("Pharmacy with id %d does not exit.", id);
-            throw new WebApplicationException(403);
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
 
-        return pharmacy;
+        return Response.ok(pharmacy).build();
     }
 
     @GET
     @RolesAllowed({"Admin", "User"})
     @Produces(MediaType.APPLICATION_JSON)
-    public List<Pharmacy> getPharmacies(@QueryParam("id") String ids) {
+    public Response getPharmacies(@QueryParam("id") String ids) {
         LOG.infof("Getting multiple pharmacies with ids %d.", ids);
         Stream<Pharmacy> stream;
         if (ids != null) {
@@ -79,13 +80,13 @@ public class PharmacyResource {
                         .collect(Collectors.toSet());
                 stream = repository.findByIds(idsSet);
             } catch (NumberFormatException ex) {
-                throw new WebApplicationException(404);
+                return Response.status(Response.Status.NOT_FOUND).build();
             }
         } else {
             stream = repository.streamAll();
         }
 
-        return stream.collect(Collectors.toList());
+        return Response.ok(stream.collect(Collectors.toList())).build();
     }
 
     @PUT
@@ -94,14 +95,14 @@ public class PharmacyResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Transactional
-    public Pharmacy updatePharmacyById(@PathParam("id") Long id, Pharmacy pharmacy) {
+    public Response updatePharmacyById(@PathParam("id") Long id, Pharmacy pharmacy) {
         LOG.infof("Updating pharmacy with id %d", id);
 
         Pharmacy persistedPharmacy = repository.findById(id);
 
         if (persistedPharmacy == null) {
             LOG.errorf("Pharmacy with id %d does not exist", id);
-            throw new WebApplicationException(403);
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
 
         persistedPharmacy.city = pharmacy.city;
@@ -110,8 +111,9 @@ public class PharmacyResource {
         persistedPharmacy.streetNumber = pharmacy.streetNumber;
 
         LOG.infof("Pharmacy with id %d updated.", id);
+        repository.persist(persistedPharmacy);
 
-        return persistedPharmacy;
+        return Response.ok(persistedPharmacy).build();
     }
 
     @DELETE
@@ -120,17 +122,17 @@ public class PharmacyResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     @Transactional
-    public String deletePharmacyById(@PathParam("id") Long id) {
+    public Response deletePharmacyById(@PathParam("id") Long id) {
         LOG.infof("Deleting pharmacy with id %d.", id);
         Pharmacy pharmacy = repository.findById(id);
 
         if (pharmacy == null) {
-            LOG.errorf("User with id %d does not exist.");
-            throw new WebApplicationException(403);
+            LOG.errorf("Pharmacy with id %d does not exist.");
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
 
         repository.delete(pharmacy);
 
-        return String.format("User with id %d deleted.", id);
+        return Response.ok(String.format("Pharmacy with id %d deleted.", id)).build();
     }
 }

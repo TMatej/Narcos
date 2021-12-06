@@ -28,7 +28,7 @@ services:
     container_name: pv217_medicine
     build:
       dockerfile: src/main/docker/Dockerfile.jvm
-      context: user-service
+      context: medicine-service
     ports:
       - "8083:8083"
     environment:
