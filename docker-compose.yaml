@@ -48,6 +48,7 @@ services:
       pv217.userService: http://pv217_user:8081
       pv217.pharmacyService: http://pv217_pharmacy:8082
       pv217.medicineService: http://pv217_medicine:8083
+      pv217.recordService: http://pv217_record:8085
     depends_on:
         - postgres
 

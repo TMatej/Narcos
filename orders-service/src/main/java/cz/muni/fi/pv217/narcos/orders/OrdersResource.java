@@ -4,6 +4,7 @@ import cz.muni.fi.pv217.narcos.orders.dtos.CreateOrderDto;
 import cz.muni.fi.pv217.narcos.orders.dtos.CreateOrderItemDto;
 import cz.muni.fi.pv217.narcos.orders.dtos.OrderDto;
 import cz.muni.fi.pv217.narcos.orders.dtos.OrderItemDto;
+import cz.muni.fi.pv217.narcos.orders.dtos.RecordDto;
 import cz.muni.fi.pv217.narcos.orders.entities.Order;
 import cz.muni.fi.pv217.narcos.orders.entities.OrderItem;
 import cz.muni.fi.pv217.narcos.orders.entities.OrderStatus;
@@ -26,6 +27,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.URI;
@@ -46,6 +48,8 @@ public class OrdersResource {
     private String pharmacyServiceUrl;
     @ConfigProperty(name = "pv217.medicineService")
     private String medicineServiceUrl;
+    @ConfigProperty(name = "pv217.recordService")
+    private String recordServiceUrl;
 
     @Inject
     private JsonWebToken jwt;
@@ -91,11 +95,20 @@ public class OrdersResource {
             if (!checkMedicineExists(item.getMedicationId())) {
                 return Response.status(Response.Status.BAD_REQUEST).build();
             }
+            if (!checkRecord(order.getPharmacyId(), item.getMedicationId(), item.getCount())) {
+                return Response.status(Response.Status.BAD_REQUEST).build();
+            }
         }
-        // check whether there is enough medications in store
         Order orderEntity = createOrderToEntity(order);
         orderEntity.persist();
         if (orderEntity.isPersistent()) {
+            for (CreateOrderItemDto item: order.getItems()) {
+                RecordDto rec = new RecordDto();
+                rec.pharmacyId = order.getPharmacyId();
+                rec.medicineId = item.getMedicationId();
+                rec.amount = item.getCount();
+                subtractFromRecord(rec);
+            }
             return Response.created(URI.create("/orders/" + orderEntity.id)).build();
         }
         return Response.status(Response.Status.BAD_REQUEST).build();
@@ -109,7 +122,6 @@ public class OrdersResource {
         Optional<Order> maybeOrder = Order.findByIdOptional(id);
         if (maybeOrder.isEmpty()) return Response.status(Response.Status.NOT_FOUND).build();
         Order order = maybeOrder.get();
-        //check whether the change is valid
         order.status = status;
         return Response.ok().build();
     }
@@ -139,6 +151,28 @@ public class OrdersResource {
                 .header("Authorization", "Bearer " + jwt.getRawToken())
                 .get().getStatus();
         return status == 200;
+    }
+
+    private boolean checkRecord(Long pharmacyId, Long medicineId, int amount) {
+        Response res = ClientBuilder.newClient()
+                .target( recordServiceUrl + "/records/pharmacy/" + pharmacyId + "/medicine/" + medicineId )
+                .request()
+                .header("Authorization", "Bearer " + jwt.getRawToken())
+                .get();
+        if (res.hasEntity()) {
+            RecordDto record = res.readEntity(RecordDto.class);
+            return record != null && record.amount >= amount;
+        }
+        return false;
+    }
+
+    private boolean subtractFromRecord(RecordDto record) {
+        Response res = ClientBuilder.newClient()
+                .target( recordServiceUrl + "/records/order")
+                .request()
+                .header("Authorization", "Bearer " + jwt.getRawToken())
+                .put(Entity.json(record));
+        return res.getStatus() == 200;
     }
 
     private Order createOrderToEntity(CreateOrderDto order) {
