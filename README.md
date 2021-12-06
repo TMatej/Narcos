@@ -14,7 +14,14 @@ Entities:
 
 ## Story/scenario of usage
 
-_*Have a scenario that you can run that showcase some reactive properties of the system (those that you implemented): Responsiveness (quick response / always on), resiliency (self-healing service), elasticity (how the system can scale up/down when needed), message-driveness (asynchronous messages with loosely coupled / location-transparent services)_*
+New admin account is created. He creates new medication into database new pharmacy and record of storage in newly created pharmacy. Then he order said medication from pharmacy. Amount of medication in storage is reduced.
+* User register into application using `/auth/register` endpoint
+* User login into application using `/auth/login` endpoint
+* User creates new medication using `/medicine` endpoint
+* User creates new pharmacy using `/pharmacies` endpoint
+* User creates new record using `/records` endpoint
+* User creates new order using `/orders/new` endpoint
+
 
 ## Questions to be answered
 
