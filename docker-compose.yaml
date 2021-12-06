@@ -45,6 +45,9 @@ services:
       - "8084:8084"
     environment:
       quarkus.datasource.jdbc.url: jdbc:postgresql://postgres:5432/d
+      pv217.userService: http://pv217_user:8081
+      pv217.pharmacyService: http://pv217_pharmacy:8082
+      pv217.medicineService: http://pv217_medicine:8083
     depends_on:
         - postgres
 
