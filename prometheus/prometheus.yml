@@ -9,6 +9,6 @@ scrape_configs:
     static_configs:
       - targets: ['localhost:9090']
   - job_name: 'orders-checker'
-    # metrics_path: /q/metrics
+    metrics_path: /q/metrics
     static_configs:
       - targets: ['localhost:8084']

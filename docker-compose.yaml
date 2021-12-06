@@ -76,9 +76,10 @@ services:
   prometheus:
     image: prom/prometheus:v2.30.3
     container_name: prometheus
-    command: "--config.file=/etc/prometheus/prometheus.yml"
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:Z
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
     ports:
       - 9090:9090
 
@@ -87,5 +88,4 @@ services:
     container_name: grafana
     restart: unless-stopped
     ports:
-        - 3000:3000
-    network_mode: host
+      - 3000:3000
