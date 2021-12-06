@@ -12,7 +12,7 @@ import javax.enterprise.context.ApplicationScoped;
 @Liveness
 @ApplicationScoped
 
-public class LivenessCheck implements HealthCheck {
+public class LivenessHealthCheck implements HealthCheck {
     @Override
     public HealthCheckResponse call() {
         return HealthCheckResponse.up("User service liveness check");
