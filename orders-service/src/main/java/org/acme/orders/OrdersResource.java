@@ -59,8 +59,9 @@ public class OrdersResource {
     @Timed(name = "createdTimer", description = "How long it takes to create orders.", unit = MetricUnits.MILLISECONDS)
     public Response createOrder(CreateOrderDto order) {
         // check whether user of the order exists
+        // check whether the pharmacy exists
         // check whether all the medications exist
-        // check whether  there is enough medications in store
+        // check whether there is enough medications in store
         Order orderEntity = createOrderToEntity(order);
         orderEntity.persist();
         if (orderEntity.isPersistent()) {
@@ -85,6 +86,7 @@ public class OrdersResource {
     private Order createOrderToEntity(CreateOrderDto order) {
         Order orderEntity = new Order();
         orderEntity.userId = order.getUserId();
+        orderEntity.pharmacyId = order.getPharmacyId();
         orderEntity.status = OrderStatus.CREATED;
         orderEntity.items = new ArrayList<>();
         for (CreateOrderItemDto item: order.getItems()) {
@@ -101,6 +103,7 @@ public class OrdersResource {
         OrderDto dto = new OrderDto();
         dto.setId(entity.id);
         dto.setUserId(entity.userId);
+        dto.setPharmacyId(entity.pharmacyId);
         dto.setCreatedAt(entity.createdAt);
         dto.setStatus(entity.status);
         List<OrderItemDto> orderItems = new ArrayList<>();

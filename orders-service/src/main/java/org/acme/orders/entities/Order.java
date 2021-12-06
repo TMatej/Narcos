@@ -15,6 +15,7 @@ import java.util.List;
 @Table(name = "Orders")
 public class Order extends PanacheEntity {
     public Long userId;
+    public Long pharmacyId;
     @CreationTimestamp
     public LocalDateTime createdAt;
     public OrderStatus status;

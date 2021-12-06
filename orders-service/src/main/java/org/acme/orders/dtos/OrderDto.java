@@ -8,6 +8,7 @@ import java.util.List;
 public class OrderDto {
     private Long id;
     private Long userId;
+    private Long pharmacyId;
     private LocalDateTime createdAt;
     private OrderStatus status;
 
@@ -25,6 +26,14 @@ public class OrderDto {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    public Long getPharmacyId() {
+        return pharmacyId;
+    }
+
+    public void setPharmacyId(Long pharmacyId) {
+        this.pharmacyId = pharmacyId;
     }
 
     public LocalDateTime getCreatedAt() {
