@@ -13,6 +13,7 @@ import javax.transaction.Transactional;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.net.URI;
 
 @Path("/medicine")
 public class MedicineResource {
@@ -58,15 +59,46 @@ public class MedicineResource {
     @RolesAllowed({"Admin", "User"})
     @Produces(MediaType.APPLICATION_JSON)
     public Response getMedicineByName(@PathParam("name") String name) {
-        LOG.info(String.format("Starting procedure get user with name '%s'.", name));
+        LOG.info(String.format("Starting procedure get medicine with name '%s'.", name));
         Medicine medicine = medicineRepository.findByName(name);
 
         if (medicine == null) {
-            LOG.error(String.format("User with name '%s' doesn't exists.", name));
+            LOG.error(String.format("Medicine with name '%s' doesn't exists.", name));
             throw new WebApplicationException(403);
         }
 
         return Response.ok(medicineToMedicineDTO(medicine)).build();
+    }
+
+    @POST
+    @Path("{id}")
+    @RolesAllowed({"Admin"})
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Transactional
+    public Response createMedicine(MedicineDTO medicineUpdateDTO) {
+        LOG.info("Starting procedure create medicine");
+        Medicine medicine = medicineRepository.findByName(medicineUpdateDTO.name);
+
+        if (medicine != null) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+
+        medicine = new Medicine();
+        medicine.name = medicineUpdateDTO.name;
+        medicine.manufacturer = medicineUpdateDTO.manufacturer;
+        medicine.form = medicineUpdateDTO.form;
+        medicine.expirationDate = medicineUpdateDTO.expirationDate;
+        medicine.quantity = medicineUpdateDTO.quantity;
+
+        medicineRepository.persist(medicine);
+
+        if (medicineRepository.isPersistent(medicine)) {
+            LOG.info(String.format("Medicine '%s' created!", medicine.name));
+            return Response.created(URI.create("/medicine/" + medicine.id)).build();
+        }
+
+        return Response.status(Response.Status.BAD_REQUEST).build();
     }
 
     @PUT
@@ -75,8 +107,8 @@ public class MedicineResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Transactional
-    public Response updateUserById(@PathParam("id") Long id, MedicineDTO medicineUpdateDTO) {
-        LOG.info(String.format("Starting procedure update user with id %d.", id));
+    public Response updateMedicineById(@PathParam("id") Long id, MedicineDTO medicineUpdateDTO) {
+        LOG.info(String.format("Starting procedure update medicine with id %d.", id));
         Medicine medicine = medicineRepository.findById(id);
 
         if (medicine == null) {
@@ -110,7 +142,7 @@ public class MedicineResource {
         }
         medicineRepository.delete(medicine);
 
-        return Response.ok(String.format("User with id %d deleted!", id)).build();
+        return Response.ok(String.format("Medicine with id %d deleted!", id)).build();
     }
 
     private MedicineDTO medicineToMedicineDTO(Medicine medicine) {
