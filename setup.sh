@@ -6,5 +6,4 @@ services=$(ls | grep '-service$')
 for service in $services; do
   cd "$repo/$service"
   mvn clean install -DskipTests
-  mvn package -DskipTests
 done
