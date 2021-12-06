@@ -72,6 +72,7 @@ public class OrdersResource {
     @RolesAllowed({"Admin", "User"})
     @Path("{id}")
     public Response getOrderById(@PathParam("id") Long id) {
+        LOG.info(String.format("Get order  with id %d", id));
         Optional<Order> maybeOrder = Order.findByIdOptional(id);
         if (maybeOrder.isEmpty()) return Response.status(Response.Status.NOT_FOUND).build();
         return Response.ok(orderEntityToDto(maybeOrder.get())).build();
@@ -119,6 +120,7 @@ public class OrdersResource {
     @Transactional
     @Path("{id}")
     public Response updateStatus(@PathParam("id") Long id, OrderStatus status) {
+        LOG.info(String.format("Updating status of order with id %d to %s", id, status.name()));
         Optional<Order> maybeOrder = Order.findByIdOptional(id);
         if (maybeOrder.isEmpty()) return Response.status(Response.Status.NOT_FOUND).build();
         Order order = maybeOrder.get();
