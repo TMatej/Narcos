@@ -25,9 +25,17 @@ New admin account is created. He creates new medication into database new pharma
 
 ## Questions to be answered
 
-1. **Why you think a microservice architecture can be appropriate:** ...
-1. **Benefits of the using microservices in this project:** ...
-1. **Drawbacks of microservices in this case:** ...
+#### **Benefits of using microservices in this project:**
+ * `scalability` of the individual services instead of scaling the entire application.
+ * `testability` of independent services which makes the the individual parts highly reliable.
+ * `reusability` of loosely coupled services in other projects.
+ * `distribution` of work among developers. Every developer can fully focus on their sub-project.  
+ * `isolation` of a service failure. Even if one service fails the whole application can stay up running and faulty module may be redeployed. 
+ 
+#### **Drawbacks of microservices in this case:**
+ * `cost` of communication between services as they ususally communicate with each other using remote calls.
+ * `control` of the interfaces of all services. Each service intorduce its own API which upon change effecs all the services depending on this specific service.
+ * `global testing` may become a challenge, especialy in situation when multiple services depend on each other.
 
 ## Microservices
 Here you can find list of available services.
