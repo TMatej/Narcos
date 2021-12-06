@@ -1,9 +1,10 @@
-package org.acme.orders.dtos;
+package cz.muni.fi.pv217.narcos.orders.dtos;
 
 import java.util.List;
 
 public class CreateOrderDto {
     private Long userId;
+    private Long pharmacyId;
     private List<CreateOrderItemDto> items;
 
     public Long getUserId() {
@@ -12,6 +13,14 @@ public class CreateOrderDto {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    public Long getPharmacyId() {
+        return pharmacyId;
+    }
+
+    public void setPharmacyId(Long pharmacyId) {
+        this.pharmacyId = pharmacyId;
     }
 
     public List<CreateOrderItemDto> getItems() {

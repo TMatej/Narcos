@@ -1,4 +1,4 @@
-package org.acme.orders.entities;
+package cz.muni.fi.pv217.narcos.orders.entities;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import org.hibernate.annotations.CreationTimestamp;
@@ -15,6 +15,7 @@ import java.util.List;
 @Table(name = "Orders")
 public class Order extends PanacheEntity {
     public Long userId;
+    public Long pharmacyId;
     @CreationTimestamp
     public LocalDateTime createdAt;
     public OrderStatus status;

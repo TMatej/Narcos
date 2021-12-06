@@ -1,6 +1,6 @@
-package org.acme.orders.dtos;
+package cz.muni.fi.pv217.narcos.orders.dtos;
 
-import org.acme.orders.entities.OrderStatus;
+import cz.muni.fi.pv217.narcos.orders.entities.OrderStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -8,6 +8,7 @@ import java.util.List;
 public class OrderDto {
     private Long id;
     private Long userId;
+    private Long pharmacyId;
     private LocalDateTime createdAt;
     private OrderStatus status;
 
@@ -25,6 +26,14 @@ public class OrderDto {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    public Long getPharmacyId() {
+        return pharmacyId;
+    }
+
+    public void setPharmacyId(Long pharmacyId) {
+        this.pharmacyId = pharmacyId;
     }
 
     public LocalDateTime getCreatedAt() {

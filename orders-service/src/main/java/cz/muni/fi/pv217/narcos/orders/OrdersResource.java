@@ -1,16 +1,21 @@
-package org.acme.orders;
+package cz.muni.fi.pv217.narcos.orders;
 
-import org.acme.orders.dtos.CreateOrderDto;
-import org.acme.orders.dtos.CreateOrderItemDto;
-import org.acme.orders.dtos.OrderDto;
-import org.acme.orders.dtos.OrderItemDto;
-import org.acme.orders.entities.Order;
-import org.acme.orders.entities.OrderItem;
-import org.acme.orders.entities.OrderStatus;
+import cz.muni.fi.pv217.narcos.orders.dtos.CreateOrderDto;
+import cz.muni.fi.pv217.narcos.orders.dtos.CreateOrderItemDto;
+import cz.muni.fi.pv217.narcos.orders.dtos.OrderDto;
+import cz.muni.fi.pv217.narcos.orders.dtos.OrderItemDto;
+import cz.muni.fi.pv217.narcos.orders.entities.Order;
+import cz.muni.fi.pv217.narcos.orders.entities.OrderItem;
+import cz.muni.fi.pv217.narcos.orders.entities.OrderStatus;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.eclipse.microprofile.metrics.MetricUnits;
 import org.eclipse.microprofile.metrics.annotation.Counted;
 import org.eclipse.microprofile.metrics.annotation.Timed;
+import org.jboss.logging.Logger;
 
+import javax.annotation.security.RolesAllowed;
+import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -20,6 +25,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.URI;
@@ -32,8 +38,22 @@ import java.util.stream.Collectors;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class OrdersResource {
+    private static final Logger LOG = Logger.getLogger(OrdersResource.class);
+
+    @ConfigProperty(name = "pv217.userService")
+    private String userServiceUrl;
+    @ConfigProperty(name = "pv217.pharmacyService")
+    private String pharmacyServiceUrl;
+    @ConfigProperty(name = "pv217.medicineService")
+    private String medicineServiceUrl;
+
+    @Inject
+    private JsonWebToken jwt;
+
     @GET
+    @RolesAllowed({"Admin", "User"})
     public List<OrderDto> getAllOrders(@QueryParam("userId") Long userId) {
+        LOG.info("Getting all orders" + (userId != null ? String.format(" from user %d", userId) : ""));
         List<Order> orders;
         if (userId != null) {
             orders = Order.list("userId", userId);
@@ -45,6 +65,7 @@ public class OrdersResource {
     }
 
     @GET
+    @RolesAllowed({"Admin", "User"})
     @Path("{id}")
     public Response getOrderById(@PathParam("id") Long id) {
         Optional<Order> maybeOrder = Order.findByIdOptional(id);
@@ -53,24 +74,35 @@ public class OrdersResource {
     }
 
     @POST
+    @RolesAllowed({"Admin", "User"})
     @Transactional
     @Path("new")
     @Counted(name = "createdOrders", description = "How many orders were created.")
     @Timed(name = "createdTimer", description = "How long it takes to create orders.", unit = MetricUnits.MILLISECONDS)
     public Response createOrder(CreateOrderDto order) {
-        // check whether user of the order exists
-        // check whether all the medications exist
-        // check whether  there is enough medications in store
+        LOG.info(String.format("Creating order from user %d to pharmacy %d", order.getUserId(), order.getPharmacyId()));
+        if (!checkUserExists(order.getUserId())) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+        if (!checkPharmacyExists(order.getPharmacyId())) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+        for (CreateOrderItemDto item: order.getItems()) {
+            if (!checkMedicineExists(item.getMedicationId())) {
+                return Response.status(Response.Status.BAD_REQUEST).build();
+            }
+        }
+        // check whether there is enough medications in store
         Order orderEntity = createOrderToEntity(order);
         orderEntity.persist();
         if (orderEntity.isPersistent()) {
-            // send email about the created order
             return Response.created(URI.create("/orders/" + orderEntity.id)).build();
         }
         return Response.status(Response.Status.BAD_REQUEST).build();
     }
 
     @PUT
+    @RolesAllowed({"Admin", "User"})
     @Transactional
     @Path("{id}")
     public Response updateStatus(@PathParam("id") Long id, OrderStatus status) {
@@ -82,9 +114,37 @@ public class OrdersResource {
         return Response.ok().build();
     }
 
+    private boolean checkUserExists(Long userId) {
+        int status = ClientBuilder.newClient()
+                .target( userServiceUrl + "/users/" + userId)
+                .request()
+                .header("Authorization", "Bearer " + jwt.getRawToken())
+                .get().getStatus();
+        return status == 200;
+    }
+
+    private boolean checkPharmacyExists(Long pharmacyId) {
+        int status = ClientBuilder.newClient()
+                .target( pharmacyServiceUrl + "/pharmacies/" + pharmacyId)
+                .request()
+                .header("Authorization", "Bearer " + jwt.getRawToken())
+                .get().getStatus();
+        return status == 200;
+    }
+
+    private boolean checkMedicineExists(Long medicineId) {
+        int status = ClientBuilder.newClient()
+                .target( medicineServiceUrl + "/medicine/" + medicineId)
+                .request()
+                .header("Authorization", "Bearer " + jwt.getRawToken())
+                .get().getStatus();
+        return status == 200;
+    }
+
     private Order createOrderToEntity(CreateOrderDto order) {
         Order orderEntity = new Order();
         orderEntity.userId = order.getUserId();
+        orderEntity.pharmacyId = order.getPharmacyId();
         orderEntity.status = OrderStatus.CREATED;
         orderEntity.items = new ArrayList<>();
         for (CreateOrderItemDto item: order.getItems()) {
@@ -101,6 +161,7 @@ public class OrdersResource {
         OrderDto dto = new OrderDto();
         dto.setId(entity.id);
         dto.setUserId(entity.userId);
+        dto.setPharmacyId(entity.pharmacyId);
         dto.setCreatedAt(entity.createdAt);
         dto.setStatus(entity.status);
         List<OrderItemDto> orderItems = new ArrayList<>();

@@ -1,4 +1,4 @@
-package org.acme.orders.entities;
+package cz.muni.fi.pv217.narcos.orders.entities;
 
 public enum OrderStatus {
     CREATED,
