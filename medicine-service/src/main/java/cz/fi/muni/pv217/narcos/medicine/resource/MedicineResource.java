@@ -71,7 +71,6 @@ public class MedicineResource {
     }
 
     @POST
-    @Path("{id}")
     @RolesAllowed({"Admin"})
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
